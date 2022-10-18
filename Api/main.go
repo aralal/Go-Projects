@@ -51,22 +51,6 @@ func createTransaction(w http.ResponseWriter, request *http.Request) {
 
 	}
 
-	//Access the photo key - First Approach
-	// _, h, err := request.FormFile("photo")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
-	// fmt.Printf("The type of file : %T", h)
-	// saveFile(h, "formfile")
-	// //Access the photo key - Second Approach
-	// for _, h := range request.MultipartForm.File["photo"] {
-	// 	err := saveFile(h, "mapaccess")
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusBadRequest)
-	// 		return
-	// 	}
-	// }
 	w.WriteHeader(200)
 	return
 }
