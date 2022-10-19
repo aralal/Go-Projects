@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,39 +14,49 @@ type Transaction struct {
 	EventId       string `json:"eventid"`
 	UserId        string `json:"userid"`
 	TransactionId string `json:"transactionid"`
+	Status        bool   `json:"status"`
 }
 
 //var transactions []Transaction
 
 func main() {
 	r := mux.NewRouter()
+	fmt.Println("API started")
 	//routing
 	r.HandleFunc("/create-transaction", createTransaction).Methods("POST")
-	r.HandleFunc("/", serveHome).Methods("GET")
+	r.HandleFunc("/home", serveHome).Methods("GET")
 	//listen to port
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8090", r))
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Serve function invoked")
 	w.Write([]byte("<h1>Welcome to the API <h1>"))
 }
 
-func createTransaction(w http.ResponseWriter, request *http.Request) {
-	err := request.ParseMultipartForm(32 << 20) // maxMemory 32MB
+func createTransaction(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("create transaction invoked")
+	err := r.ParseMultipartForm(32 << 20) // maxMemory 32MB
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	var tran Transaction
-	if request.PostFormValue("bactid") == "" || request.PostFormValue("eventid") == "" || request.PostFormValue("userid") == "" || request.PostFormValue("transactionid") == "" {
-		w.WriteHeader(http.StatusBadRequest)
+	if r.PostFormValue("bactid") == "" || r.PostFormValue("eventid") == "" || r.PostFormValue("userid") == "" || r.PostFormValue("transactionid") == "" {
+		//w.WriteHeader(http.StatusBadRequest)
+		tran.Status = false
+		tran.BactId = r.PostFormValue("bactid")
+		tran.EventId = r.PostFormValue("eventid")
+		tran.UserId = r.PostFormValue("userid")
+		tran.TransactionId = r.PostFormValue("transactionid")
+		w.Header().Set("content-Type", "application/json")
+		json.NewEncoder(w).Encode(tran)
 	} else {
-		tran.BactId = request.PostFormValue("bactid")
-		tran.EventId = request.PostFormValue("eventid")
-		tran.UserId = request.PostFormValue("userid")
-		tran.TransactionId = request.PostFormValue("transactionid")
-		//transactions = append(transactions, tran)
-
+		tran.Status = true
+		tran.BactId = r.PostFormValue("bactid")
+		tran.EventId = r.PostFormValue("eventid")
+		tran.UserId = r.PostFormValue("userid")
+		tran.TransactionId = r.PostFormValue("transactionid")
 		w.Header().Set("content-Type", "application/json")
 		json.NewEncoder(w).Encode(tran)
 
