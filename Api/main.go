@@ -43,7 +43,7 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 	var tran Transaction
 	if r.PostFormValue("bactid") == "" || r.PostFormValue("eventid") == "" || r.PostFormValue("userid") == "" || r.PostFormValue("transactionid") == "" {
-		//w.WriteHeader(http.StatusBadRequest)
+
 		tran.Status = false
 		tran.BactId = r.PostFormValue("bactid")
 		tran.EventId = r.PostFormValue("eventid")
