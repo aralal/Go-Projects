@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -49,16 +50,20 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 		tran.EventId = r.PostFormValue("eventid")
 		tran.UserId = r.PostFormValue("userid")
 		tran.TransactionId = r.PostFormValue("transactionid")
-		w.Header().Set("content-Type", "application/json")
-		json.NewEncoder(w).Encode(tran)
+		//w.Header().Set("content-Type", "application/json")
+		//json.NewEncoder(w).Encode(tran)
+		//file, err := os.Create("./trans.json")
+		file, _ := json.MarshalIndent(tran, "", " ")
+		ipfsfile = ioutil.WriteFile("./trans.json", file, 0644)
+
 	} else {
-		tran.Status = true
-		tran.BactId = r.PostFormValue("bactid")
-		tran.EventId = r.PostFormValue("eventid")
-		tran.UserId = r.PostFormValue("userid")
-		tran.TransactionId = r.PostFormValue("transactionid")
-		w.Header().Set("content-Type", "application/json")
-		json.NewEncoder(w).Encode(tran)
+		// tran.Status = true
+		// tran.BactId = r.PostFormValue("bactid")
+		// tran.EventId = r.PostFormValue("eventid")
+		// tran.UserId = r.PostFormValue("userid")
+		// tran.TransactionId = r.PostFormValue("transactionid")
+		// w.Header().Set("content-Type", "application/json")
+		// json.NewEncoder(w).Encode(tran)
 
 	}
 
