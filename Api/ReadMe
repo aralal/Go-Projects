@@ -1,0 +1,2 @@
+This api takes request in form of multipart-formdata and gives output as a CID.
+The input is taken and converted into json format and added to ipfs network, the genrated CID is then given back as response to the API
