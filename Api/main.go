@@ -6,8 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
+	shell "github.com/ipfs/go-ipfs-api"
 )
 
 type Transaction struct {
@@ -18,8 +20,6 @@ type Transaction struct {
 	Status        bool   `json:"status"`
 }
 
-//var transactions []Transaction
-
 func main() {
 	r := mux.NewRouter()
 	fmt.Println("API started")
@@ -27,12 +27,18 @@ func main() {
 	r.HandleFunc("/create-transaction", createTransaction).Methods("POST")
 	r.HandleFunc("/home", serveHome).Methods("GET")
 	//listen to port
-	log.Fatal(http.ListenAndServe(":8090", r))
+	log.Fatal(http.ListenAndServe(":8000", r))
+
 }
 
+// check for local host connection
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Serve function invoked")
 	w.Write([]byte("<h1>Welcome to the API <h1>"))
+}
+
+func addFile(sh *shell.Shell, text string) (string, error) {
+	return sh.Add(strings.NewReader(text))
 }
 
 func createTransaction(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +49,7 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var tran Transaction
+	sh := shell.NewShell("localhost:5001")
 	if r.PostFormValue("bactid") == "" || r.PostFormValue("eventid") == "" || r.PostFormValue("userid") == "" || r.PostFormValue("transactionid") == "" {
 
 		tran.Status = false
@@ -50,20 +57,59 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 		tran.EventId = r.PostFormValue("eventid")
 		tran.UserId = r.PostFormValue("userid")
 		tran.TransactionId = r.PostFormValue("transactionid")
-		//w.Header().Set("content-Type", "application/json")
-		//json.NewEncoder(w).Encode(tran)
-		//file, err := os.Create("./trans.json")
+		//writing object to a json file
 		file, _ := json.MarshalIndent(tran, "", " ")
-		ipfsfile = ioutil.WriteFile("./trans.json", file, 0644)
+		err := ioutil.WriteFile("./trans.json", file, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		//ipfs
+		fmt.Println("Adding file to IPFS")
+		//reading from the file
+		data, err := ioutil.ReadFile("./trans.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		//adding file to ipfs
+		// cid, err := sh.Add(strings.NewReader(string(data)))
+		// if err != nil {
+		// 	fmt.Println("Error adding file to IPFS:", err.Error())
+		// 	return
+		// }
+		// fmt.Println("File added with CID:", cid)
+		cid, err := addFile(sh, string(data))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("File added with CID:", cid)
+		json.NewEncoder(w).Encode(cid)
 
 	} else {
-		// tran.Status = true
-		// tran.BactId = r.PostFormValue("bactid")
-		// tran.EventId = r.PostFormValue("eventid")
-		// tran.UserId = r.PostFormValue("userid")
-		// tran.TransactionId = r.PostFormValue("transactionid")
-		// w.Header().Set("content-Type", "application/json")
-		// json.NewEncoder(w).Encode(tran)
+		tran.Status = true
+		tran.BactId = r.PostFormValue("bactid")
+		tran.EventId = r.PostFormValue("eventid")
+		tran.UserId = r.PostFormValue("userid")
+		tran.TransactionId = r.PostFormValue("transactionid")
+		//writing object to a json file
+		file, _ := json.MarshalIndent(tran, "", " ")
+		err := ioutil.WriteFile("./trans.json", file, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//ipfs
+		fmt.Println("Adding file to IPFS")
+		//reading from the file
+		data, err := ioutil.ReadFile("./trans.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		cid, err := addFile(sh, string(data))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("File added with CID:", cid)
+		json.NewEncoder(w).Encode(cid)
 
 	}
 
