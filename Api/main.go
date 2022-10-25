@@ -71,13 +71,7 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		//adding file to ipfs
-		// cid, err := sh.Add(strings.NewReader(string(data)))
-		// if err != nil {
-		// 	fmt.Println("Error adding file to IPFS:", err.Error())
-		// 	return
-		// }
-		// fmt.Println("File added with CID:", cid)
+
 		cid, err := addFile(sh, string(data))
 		if err != nil {
 			log.Fatal(err)
