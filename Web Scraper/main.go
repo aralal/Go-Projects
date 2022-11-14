@@ -1,6 +1,10 @@
 package main
 
-import "github.com/gocolly/colly"
+import (
+	"fmt"
+
+	"github.com/gocolly/colly"
+)
 
 type item struct {
 	Name   string `json:"name"`
@@ -10,10 +14,11 @@ type item struct {
 
 func main() {
 	c := colly.NewCollector(
-		colly.AllowedDomains("amazon.in"),
+		colly.AllowedDomains("j2store.net"),
 	)
-	c.OnHTML(" ", func(h *colly.HTMLElement) {
-
+	c.OnHTML("div.col-sm-9 div[itemprop=itemListElement]", func(h *colly.HTMLElement) {
+		fmt.Println(h.ChildText("h2.product-title"))
 	})
+	c.Visit("https://j2store.net/demo/index.php/shop")
 
 }
