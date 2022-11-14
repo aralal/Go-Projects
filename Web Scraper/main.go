@@ -1,24 +1,52 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"fmt" //formatted I/O
+	"os"
 
-	"github.com/gocolly/colly"
+	"github.com/gocolly/colly" //scraping framework
 )
 
 type item struct {
-	Name   string `json:"name"`
-	Price  string `json:"price"`
-	ImgUrl string `json:"imgurl"`
+	Name  string `json:name`
+	Stars string `json:stars`
+	Price string `json:price`
 }
 
 func main() {
-	c := colly.NewCollector(
-		colly.AllowedDomains("j2store.net"),
-	)
-	c.OnHTML("div.col-sm-9 div[itemprop=itemListElement]", func(h *colly.HTMLElement) {
-		fmt.Println(h.ChildText("h2.product-title"))
-	})
-	c.Visit("https://j2store.net/demo/index.php/shop")
 
+	c := colly.NewCollector(colly.AllowedDomains("www.amazon.in"))
+
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Link of the page:", r.URL)
+	})
+
+	c.OnHTML("div.s-result-list.s-search-results.sg-row", func(h *colly.HTMLElement) {
+		h.ForEach("div.a-section.a-spacing-base", func(_ int, h *colly.HTMLElement) {
+			// var name string
+			// name = h.ChildText("span.a-size-base-plus.a-color-base.a-text-normal")
+			// var stars string
+			// stars = h.ChildText("span.a-icon-alt")
+			// var price string
+			// price = h.ChildText("span.a-price-whole")
+
+			Item := item{
+				Name:  h.ChildText("span.a-size-base-plus.a-color-base.a-text-normal"),
+				Stars: h.ChildText("span.a-icon-alt"),
+				Price: h.ChildText("span.a-price-whole"),
+			}
+			var Items []item
+			Items = append(Items, Item)
+			j, err := json.MarshalIndent(Items, " ", " ")
+			if err != nil {
+				fmt.Println(err)
+			}
+			os.WriteFile("product.json", j, 0644)
+			fmt.Println(string(j))
+
+		})
+	})
+
+	c.Visit("https://www.amazon.in/s?k=keyboard")
 }
