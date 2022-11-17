@@ -24,12 +24,6 @@ func main() {
 
 	c.OnHTML("div.s-result-list.s-search-results.sg-row", func(h *colly.HTMLElement) {
 		h.ForEach("div.a-section.a-spacing-base", func(_ int, h *colly.HTMLElement) {
-			// var name string
-			// name = h.ChildText("span.a-size-base-plus.a-color-base.a-text-normal")
-			// var stars string
-			// stars = h.ChildText("span.a-icon-alt")
-			// var price string
-			// price = h.ChildText("span.a-price-whole")
 
 			Item := item{
 				Name:  h.ChildText("span.a-size-base-plus.a-color-base.a-text-normal"),
